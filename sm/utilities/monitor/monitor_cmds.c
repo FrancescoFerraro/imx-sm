@@ -128,6 +128,10 @@ static int32_t MONITOR_CmdFuse(int32_t argc, const char * const argv[],
 static int32_t MONITOR_CmdPmic(int32_t argc, const char * const argv[],
     int32_t rw);
 #endif
+#ifdef BOARD_HAS_EEPROM
+static int32_t MONITOR_CmdEeprom(int32_t argc, const char * const argv[],
+    int32_t rw);
+#endif
 static int32_t MONITOR_CmdCustom(int32_t argc, const char * const argv[]);
 
 /* Local Variables */
@@ -193,7 +197,9 @@ int32_t MONITOR_Dispatch(char *line)
         "fuse.w",
         "pmic.r",
         "pmic.w",
-        "custom"
+        "eeprom.r",
+        "eeprom.w",
+        "custom",
     };
 
     /* Parse Line */
@@ -355,7 +361,15 @@ int32_t MONITOR_Dispatch(char *line)
                 status = MONITOR_CmdPmic(argc - 1, &argv[1], WRITE);
                 break;
 #endif
-            case 47:  /* custom */
+#ifdef BOARD_HAS_EEPROM
+            case 47:  /* eeprom.r */
+                status = MONITOR_CmdEeprom(argc - 1, &argv[1], READ);
+                break;
+            case 48:  /* eeprom.w */
+                status = MONITOR_CmdEeprom(argc - 1, &argv[1], WRITE);
+                break;
+#endif
+            case 49:  /* custom */
                 status = MONITOR_CmdCustom(argc - 1, &argv[1]);
                 break;
             default:
@@ -2729,6 +2743,126 @@ static int32_t MONITOR_CmdPmic(int32_t argc, const char * const argv[],
                 {
                     printf("PMIC 0x%02x write register 0x%02x: 0x%02x\n",
                         addr, reg, data);
+                }
+            }
+            break;
+    }
+
+    /* Return status */
+    return status;
+}
+#endif
+
+#ifdef BOARD_HAS_EEPROM
+/*--------------------------------------------------------------------------*/
+/* EEPROM command                                                           */
+/*--------------------------------------------------------------------------*/
+static int32_t MONITOR_CmdEeprom(int32_t argc, const char * const argv[],
+    int32_t rw)
+{
+    uint8_t dev;
+    uint8_t width;
+    uint16_t cnt;
+    uint16_t offset;
+    uint32_t value;
+    int32_t status = SM_ERR_SUCCESS;
+
+    switch (rw)
+    {
+        default:  /* read */
+            if (argc < 4)
+            {
+                status = SM_ERR_MISSING_PARAMETERS;
+            }
+            else
+            {
+                dev = (uint8_t) strtoul(argv[0], NULL, 0);
+                offset = (uint16_t) strtoul(argv[1], NULL, 0);
+                width = (uint8_t)argv[2][0]; /* b,w,l */
+                cnt = (uint16_t) strtoul(argv[3], NULL, 0);
+
+                switch(width)
+                {
+                    case 'b':
+                        width = 1;
+                        break;
+                    case 'w':
+                        width = 2;
+                        break;
+                    case 'l':
+                        width = 4;
+                        break;
+                    default:
+                        cnt = 0; /* skip read from EEPROM */
+                        status = SM_ERR_INVALID_PARAMETERS;
+                        break;
+                }
+
+                /* Re-caclulate count based on given width */
+                cnt = cnt * width;
+
+                while(cnt > 0)
+                {
+                    uint8_t data[16];
+                    uint8_t n = (cnt > 16) ? 16 : cnt;
+                    status = BRD_SM_EepromRead(dev, offset, data, n);
+
+                    if (status != SM_ERR_SUCCESS)
+                    {
+                        break;
+                    }
+
+                    for (uint8_t i = 0; i < n; i++)
+                    {
+                        if (i % 16 == 0)
+                        {
+                            printf("%04x: ", offset + i);
+                        }
+                        printf("%02x ", data[i]);
+                        if ((i + 1) % 16 == 0 || i == n - 1)
+                        {
+                            printf("\n");
+                        }
+                    }
+
+                    offset += n;
+                    cnt -= n;
+                }
+            }
+            break;
+
+        case WRITE:
+            if (argc < 4)
+            {
+                status = SM_ERR_MISSING_PARAMETERS;
+            }
+            else
+            {
+                dev = (uint8_t) strtoul(argv[0], NULL, 0);
+                offset = (uint16_t) strtoul(argv[1], NULL, 0);
+                width = (uint8_t)argv[2][0]; /* b,w,l */
+                value = (uint32_t) strtoul(argv[3], NULL, 0);
+
+                switch (width)
+                {
+                    case 'b':
+                        width = 1;
+                        break;
+                    case 'w':
+                        width = 2;
+                        break;
+                    case 'l':
+                        width = 4;
+                        break;
+                    default:
+                        width = 0;
+                        status = SM_ERR_INVALID_PARAMETERS;
+                        break;
+                }
+
+                if (width > 0)
+                {
+                    status = BRD_SM_EepromWrite(dev, offset, (uint8_t *)&value, width);
                 }
             }
             break;
