@@ -52,6 +52,7 @@
 
 #include "sm.h"
 #include "dev_sm.h"
+#include "fsl_eeprom.h"
 #include "fsl_pcal6408a.h"
 #include "fsl_pf09.h"
 #include "fsl_pf53.h"
@@ -76,6 +77,9 @@ extern PF53_Type pf5301Dev;
 
 /*! Handle to acces PF5302 */
 extern PF53_Type pf5302Dev;
+
+/*! Handle to access EEPROM */
+extern Eeprom_Type eepromDev;
 
 /* Functions */
 

@@ -267,6 +267,40 @@ int32_t BRD_SM_SupplyLevelSet(uint32_t domain, uint32_t microVolt);
  */
 int32_t BRD_SM_SupplyLevelGet(uint32_t domain, uint32_t *microVolt);
 
+#ifdef BOARD_HAS_EEPROM
+
+/*!
+ * Read from EEPROM.
+ *
+ * @param[in]     devAddr  I2C address of the EEPROM.
+ * @param[in]     offset   Offset to read from.
+ * @param[out]    data     Pointer to return data.
+ * @param[in]     len      Length of data to read.
+ * @return Returns the status (::SM_ERR_SUCCESS = success).
+ *
+ * Return errors (see @ref STATUS "SM error codes"):
+ * - ::SM_ERR_HARDWARE_ERROR: if there is an issue reading the EEPROM.
+ */
+int32_t BRD_SM_EepromRead(uint8_t devAddr, uint16_t offset, uint8_t *data,
+    uint16_t len);
+
+/*!
+ * Write to EEPROM.
+ *
+ * @param[in]     devAddr  I2C address of the EEPROM.
+ * @param[in]     offset   Offset to write to.
+ * @param[in]     data     Pointer to data to write.
+ * @param[in]     len      Length of data to write.
+ * @return Returns the status (::SM_ERR_SUCCESS = success).
+ *
+ * Return errors (see @ref STATUS "SM error codes"):
+ * - ::SM_ERR_HARDWARE_ERROR: if there is an issue writing the EEPROM.
+ */
+int32_t BRD_SM_EepromWrite(uint8_t devAddr, uint16_t offset, uint8_t *data,
+    uint16_t len);
+
+#endif
+
 /** @} */
 
 #endif /* BRD_SM_API_H */

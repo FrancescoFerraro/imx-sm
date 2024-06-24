@@ -588,3 +588,40 @@ int32_t BRD_SM_SupplyLevelGet(uint32_t domain, uint32_t *microVolt)
     return BRD_SM_VoltageLevelGet(domain, (int32_t*) microVolt);
 }
 
+/*--------------------------------------------------------------------------*/
+/* Read data from EEPROM                                                    */
+/*--------------------------------------------------------------------------*/
+int32_t BRD_SM_EepromRead(uint8_t devAddr, uint16_t offset, uint8_t *data,
+    uint16_t len)
+{
+    if (devAddr != eepromDev.devAddr)
+    {
+        return SM_ERR_NOT_FOUND;
+    }
+
+    if (!Eeprom_Read(&eepromDev, offset, data, len))
+    {
+        return SM_ERR_HARDWARE_ERROR;
+    }
+
+    return SM_ERR_SUCCESS;
+}
+
+/*--------------------------------------------------------------------------*/
+/* Write data to EEPROM                                                     */
+/*--------------------------------------------------------------------------*/
+int32_t BRD_SM_EepromWrite(uint8_t devAddr, uint16_t offset, uint8_t *data,
+    uint16_t len)
+{
+    if (devAddr != eepromDev.devAddr)
+    {
+        return SM_ERR_NOT_FOUND;
+    }
+
+    if (!Eeprom_Write(&eepromDev, offset, data, len))
+    {
+        return SM_ERR_HARDWARE_ERROR;
+    }
+
+    return SM_ERR_SUCCESS;
+}

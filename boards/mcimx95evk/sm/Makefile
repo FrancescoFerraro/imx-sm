@@ -40,6 +40,7 @@ INCLUDE +=  \
 	-I$(BOARDS_DIR)  \
 	-I$(BOARD_DIR)  \
 	-I$(BOARD_DIR)/sm \
+	-I$(COMPONENTS_DIR)/eeprom  \
 	-I$(COMPONENTS_DIR)/pcal6408a  \
 	-I$(COMPONENTS_DIR)/pf09  \
 	-I$(COMPONENTS_DIR)/pf53
@@ -49,6 +50,7 @@ VPATH +=  \
 	$(BOARDS_DIR)  \
 	$(BOARD_DIR)  \
 	$(BOARD_DIR)/sm  \
+	$(COMPONENTS_DIR)/eeprom  \
 	$(COMPONENTS_DIR)/pcal6408a  \
 	$(COMPONENTS_DIR)/pf09  \
 	$(COMPONENTS_DIR)/pf53
@@ -60,6 +62,7 @@ OBJS += \
 	$(OUT)/brd_sm_control.o  \
 	$(OUT)/brd_sm_sensor.o  \
 	$(OUT)/brd_sm_voltage.o  \
+	$(OUT)/fsl_eeprom.o  \
 	$(OUT)/fsl_pcal6408a.o  \
 	$(OUT)/fsl_pf09.o  \
 	$(OUT)/fsl_pf53.o

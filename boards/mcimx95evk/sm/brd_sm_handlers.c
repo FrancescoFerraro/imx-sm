@@ -51,10 +51,16 @@
 #define BOARD_PCAL6408A_DEV_ADDR    0x20U
 #define BOARD_PF5301_DEV_ADDR       0x2AU
 #define BOARD_PF5302_DEV_ADDR       0x29U
+#define BOARD_EEPROM_DEV_ADDR       0x52U
 
 #define PCAL6408A_INPUT_PF53_ARM_PG  1U
 #define PCAL6408A_INPUT_PF53_SOC_PG  2U
 #define PCAL6408A_INPUT_PF09_INT     3U
+
+#define BOARD_EEPROM_SIZE           512U
+#define BOARD_EEPROM_PAGE_SIZE      16U
+#define BOARD_EEPROM_ADDR_SIZE      1U
+#define BOARD_EEPROM_ADDR_MASK      1U
 
 /* Local types */
 
@@ -66,6 +72,7 @@ PCAL6408A_Type pcal6408aDev;
 PF09_Type pf09Dev;
 PF53_Type pf5301Dev;
 PF53_Type pf5302Dev;
+Eeprom_Type eepromDev;
 
 /* Local functions */
 
@@ -157,6 +164,23 @@ int32_t BRD_SM_SerialDevicesInit(void)
         if (!PF53_Init(&pf5302Dev))
         {
             printf("Error $s: %d\n",__func__,__LINE__);
+            status = SM_ERR_HARDWARE_ERROR;
+        }
+    }
+
+    if (status == SM_ERR_SUCCESS)
+    {
+        /* Fill in EEPROM handle */
+        eepromDev.i2cBase = s_i2cBases[BOARD_I2C_INSTANCE];
+        eepromDev.devAddr = BOARD_EEPROM_DEV_ADDR;
+        eepromDev.size = BOARD_EEPROM_SIZE;
+        eepromDev.pageSize = BOARD_EEPROM_PAGE_SIZE;
+        eepromDev.subAddrSize = BOARD_EEPROM_ADDR_SIZE;
+        eepromDev.subAddrMask = BOARD_EEPROM_ADDR_MASK;
+
+        /* Inialize EEPROM */
+        if (!Eeprom_Init(&eepromDev))
+        {
             status = SM_ERR_HARDWARE_ERROR;
         }
     }
