@@ -2,6 +2,7 @@
 ** ###################################################################
 **
 ** Copyright 2023-2024 NXP
+** Copyright 2024 Variscite
 **
 ** Redistribution and use in source and binary forms, with or without modification,
 ** are permitted provided that the following conditions are met:
@@ -571,3 +572,48 @@ int32_t BRD_SM_SupplyLevelGet(uint32_t domain, uint32_t *microVolt)
     return BRD_SM_VoltageLevelGet(domain, (int32_t*) microVolt);
 }
 
+/*--------------------------------------------------------------------------*/
+/* Read data from EEPROM                                                    */
+/*--------------------------------------------------------------------------*/
+int32_t BRD_SM_EepromRead(uint8_t devAddr, uint16_t offset, uint8_t *data,
+    uint16_t len)
+{
+    if (data == NULL || len == 0U)
+    {
+        return SM_ERR_INVALID_PARAMETERS;
+    }
+
+    if (devAddr != eepromDev.devAddr)
+    {
+        return SM_ERR_NOT_FOUND;
+    }
+
+    if (!Eeprom_Read(&eepromDev, offset, data, len))
+    {
+        return SM_ERR_HARDWARE_ERROR;
+    }
+
+    return SM_ERR_SUCCESS;
+}
+
+/*--------------------------------------------------------------------------*/
+/* Xfer data to EEPROM                                                      */
+/*--------------------------------------------------------------------------*/
+int32_t BRD_SM_EepromXfer(uint8_t devAddr, uint8_t dir, uint16_t offset,
+    uint8_t *buffer, uint16_t len)
+{
+    if (devAddr != eepromDev.devAddr)
+    {
+        return SM_ERR_NOT_FOUND;
+    }
+
+    switch (dir)
+    {
+        case BRD_SM_EEPROM_XFER_READ:
+            return BRD_SM_EepromRead(devAddr, offset, buffer, len);
+        case BRD_SM_EEPROM_XFER_WRITE:
+            return SM_ERR_NOT_SUPPORTED;
+        default:
+            return SM_ERR_INVALID_PARAMETERS;
+    }
+}
