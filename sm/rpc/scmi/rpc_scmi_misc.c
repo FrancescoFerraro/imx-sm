@@ -2,6 +2,7 @@
 ** ###################################################################
 **
 ** Copyright 2023-2024 NXP
+** Copyright 2024 Variscite
 **
 ** Redistribution and use in source and binary forms, with or without modification,
 ** are permitted provided that the following conditions are met:
@@ -60,6 +61,7 @@
 #define COMMAND_MISC_REASON_ATTRIBUTES       0x9U
 #define COMMAND_MISC_RESET_REASON            0xAU
 #define COMMAND_MISC_SI_INFO                 0xBU
+#define COMMAND_MISC_EEPROM_XFER             0xCU
 #define COMMAND_NEGOTIATE_PROTOCOL_VERSION   0x10U
 #define COMMAND_SUPPORTED_MASK               0x10FFFUL
 
@@ -332,6 +334,23 @@ typedef struct
     uint32_t flags;
 } msg_rmisc32_t;
 
+/* Request type for EeepromXfer() */
+typedef struct
+{
+    /* Header word */
+    uint32_t header;
+    /* Device Id */
+    uint32_t devId;
+    /* Direction of Xfer (0: read, 1: write) */
+    uint32_t dir;
+    /* Offset within EEPROM */
+    uint32_t offset;
+    /* Buffer Address */
+    uint32_t buffer;
+    /* Length of data to xfer */
+    uint32_t len;
+} msg_rmisc12_t;
+
 /* Local functions */
 
 static int32_t MiscProtocolVersion(const scmi_caller_t *caller,
@@ -358,6 +377,8 @@ static int32_t MiscResetReason(const scmi_caller_t *caller,
     const msg_rmisc10_t *in, msg_tmisc10_t *out, uint32_t *len);
 static int32_t MiscSiInfo(const scmi_caller_t *caller,
     const scmi_msg_header_t *in, msg_tmisc11_t *out);
+static int32_t MiscEepromXfer(const scmi_caller_t *caller,
+    const msg_rmisc12_t *in, scmi_msg_status_t *out);
 static int32_t MiscNegotiateProtocolVersion(const scmi_caller_t *caller,
     const msg_rmisc16_t *in, const scmi_msg_status_t *out);
 static int32_t MiscControlEvent(scmi_msg_id_t msgId,
@@ -442,6 +463,11 @@ int32_t RPC_SCMI_MiscDispatchCommand(scmi_caller_t *caller,
             lenOut = sizeof(msg_tmisc11_t);
             status = MiscSiInfo(caller, (const scmi_msg_header_t*) in,
                 (msg_tmisc11_t*) out);
+            break;
+        case COMMAND_MISC_EEPROM_XFER:
+            lenOut = sizeof(scmi_msg_status_t);
+            status = MiscEepromXfer(caller, (const msg_rmisc12_t*) in,
+                (scmi_msg_status_t*) out);
             break;
         case COMMAND_NEGOTIATE_PROTOCOL_VERSION:
             lenOut = sizeof(const scmi_msg_status_t);
@@ -1237,6 +1263,55 @@ static int32_t MiscSiInfo(const scmi_caller_t *caller,
 
         /* Copy out name */
         RPC_SCMI_StrCpy(out->siName, nameAddr, MISC_MAX_SINAME);
+    }
+
+    /* Return status */
+    return status;
+}
+
+/*--------------------------------------------------------------------------*/
+/* Eeprom Xfer                                                              */
+/*                                                                          */
+/* Parameters:                                                              */
+/* - caller: Caller info                                                    */
+/* - in->devId: Device ID                                                   */
+/* - in->direction: Transfer direction                                      */
+/* - in->offset: Offset in the EEPROM                                       */
+/* - in->buffer: Buffer to transfer                                         */
+/* - in->len: Length of the transfer                                        */
+/*                                                                          */
+/* Process the MISC_EEPROM_XFER message. Platform handler for               */
+/* SCMI_MiscEepromXfer().                                                   */
+/*                                                                          */
+/* Return errors:                                                           */
+/* - SM_ERR_PROTOCOL_ERROR: if the incoming payload is too small.           */
+/*--------------------------------------------------------------------------*/
+static int32_t MiscEepromXfer(const scmi_caller_t *caller,
+    const msg_rmisc12_t *in, scmi_msg_status_t *out)
+{
+    uint8_t devId;
+    uint8_t dir;
+    uint8_t *buf;
+    uint16_t len;
+    uint16_t offset;
+    int32_t status = SM_ERR_SUCCESS;
+
+    /* Check request length */
+    if (caller->lenCopy < sizeof(*in))
+    {
+        status = SM_ERR_PROTOCOL_ERROR;
+    }
+
+    /* Perform Xfer on EEPROM */
+    if (status == SM_ERR_SUCCESS)
+    {
+        devId = (uint8_t) in->devId;
+        dir = (uint8_t) in->dir;
+        buf = (uint8_t*) in->buffer;
+        len = (uint16_t) in->len;
+        offset = (uint16_t) in->offset;
+
+        status = LMM_MiscEepromXfer(devId, dir, offset, buf, len);
     }
 
     /* Return status */
