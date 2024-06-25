@@ -594,6 +594,11 @@ int32_t BRD_SM_SupplyLevelGet(uint32_t domain, uint32_t *microVolt)
 int32_t BRD_SM_EepromRead(uint8_t devAddr, uint16_t offset, uint8_t *data,
     uint16_t len)
 {
+    if (data == NULL || len == 0U)
+    {
+        return SM_ERR_INVALID_PARAMETERS;
+    }
+
     if (devAddr != eepromDev.devAddr)
     {
         return SM_ERR_NOT_FOUND;
@@ -613,6 +618,11 @@ int32_t BRD_SM_EepromRead(uint8_t devAddr, uint16_t offset, uint8_t *data,
 int32_t BRD_SM_EepromWrite(uint8_t devAddr, uint16_t offset, uint8_t *data,
     uint16_t len)
 {
+    if (data == NULL || len == 0U)
+    {
+        return SM_ERR_INVALID_PARAMETERS;
+    }
+
     if (devAddr != eepromDev.devAddr)
     {
         return SM_ERR_NOT_FOUND;
