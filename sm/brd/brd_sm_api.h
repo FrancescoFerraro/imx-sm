@@ -52,6 +52,15 @@
 #include "sm.h"
 
 /* Defines */
+/*!
+ * @name Board EEPROM Xfer direction
+ */
+/** @{ */
+/*! Direction read */
+#define BRD_SM_EEPROM_XFER_READ   0U  /*!< Read from EEPROM */
+/*! Direction write */
+#define BRD_SM_EEPROM_XFER_WRITE  1U  /*!< Write to EEPROM */
+/** @} */
 
 /* Types */
 
@@ -298,6 +307,22 @@ int32_t BRD_SM_EepromRead(uint8_t devAddr, uint16_t offset, uint8_t *data,
  */
 int32_t BRD_SM_EepromWrite(uint8_t devAddr, uint16_t offset, uint8_t *data,
     uint16_t len);
+
+/*!
+ * Transfer to/from EEPROM.
+ *
+ * @param[in]     devAddr  I2C address of the EEPROM.
+ * @param[in]     dir      Direction of transfer.
+ * @param[in]     offset   Offset to transfer to/from.
+ * @param[in]     buffer   Pointer to transfer buffer.
+ * @param[in]     len      Length of data to transfer.
+ * @return Returns the status (::SM_ERR_SUCCESS = success).
+ *
+ * Return errors (see @ref STATUS "SM error codes"):
+ * - ::SM_ERR_HARDWARE_ERROR: if there is an issue transferring to/from the EEPROM.
+ */
+int32_t BRD_SM_EepromXfer(uint8_t devAddr, uint8_t dir, uint16_t offset,
+    uint8_t *buffer, uint16_t len);
 
 #endif
 
