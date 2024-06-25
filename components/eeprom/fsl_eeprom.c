@@ -82,6 +82,11 @@ bool Eeprom_Read(const Eeprom_Type *dev, uint16_t addr, uint8_t *data,
     uint16_t readSize;
     status_t status = kStatus_Success;
 
+    if (dev == NULL || data == NULL)
+    {
+        return false;
+    }
+
     if ((addr + size) > dev->size || size == 0)
     {
         return false;
@@ -124,6 +129,11 @@ bool Eeprom_Write(const Eeprom_Type *dev, uint16_t addr, uint8_t *data,
     uint16_t devAddr;
     uint16_t writeSize;
     status_t status = kStatus_Success;
+
+    if (dev == NULL || data == NULL)
+    {
+        return false;
+    }
 
     if ((addr + size) > dev->size || size == 0)
     {
