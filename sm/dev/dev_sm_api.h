@@ -2,6 +2,7 @@
 ** ###################################################################
 **
 ** Copyright 2023-2024 NXP
+** Copyright 2024 Variscite
 **
 ** Redistribution and use in source and binary forms, with or without modification,
 ** are permitted provided that the following conditions are met:
@@ -573,6 +574,11 @@
 #ifndef SM_SIINFOGET
 /*! Redirector (device/board) to get silicon info */
 #define SM_SIINFOGET            DEV_SM_SiInfoGet
+#endif
+
+#ifndef SM_EEPROMXFER
+/*! Redirector (device/board) to xfer Eeprom */
+#define SM_EEPROMXFER           BRD_SM_EepromXfer
 #endif
 
 /** @} */
