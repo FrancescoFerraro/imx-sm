@@ -169,6 +169,29 @@ int32_t LMM_MiscRomPassoverGet(uint32_t lmId,
  */
 void LMM_MiscControlEvent(uint32_t ctrlId, uint32_t flags);
 
+#ifdef BOARD_HAS_EEPROM
+/*!
+ * Perform a miscellaneous EEPROM transfer.
+ *
+ * @param[in]     dev     Device to transfer to/from
+ * @param[in]     dir     Direction of transfer
+ * @param[in]     offset  Offset in EEPROM to transfer to/from
+ * @param[in]     buf     Pointer to buffer to transfer
+ * @param[in]     len     Length of transfer
+ *
+ * This function allows a caller to perform a miscellaneous EEPROM
+ * transfer. The direction is either read or write.
+ *
+ * @return Returns the status (::SM_ERR_SUCCESS = success).
+ *
+ * Return errors (see @ref STATUS "SM error codes"):
+ * - ::SM_ERR_SUCCESS: if the transfer is successful.
+ * - others returned by ::SM_EEPROMXFER
+ */
+int32_t LMM_MiscEepromXfer(uint8_t dev, uint8_t dir, uint16_t offset,
+    uint8_t* buf, uint16_t len);
+#endif
+
 #endif /* LMM_MISC_H */
 
 /** @} */
