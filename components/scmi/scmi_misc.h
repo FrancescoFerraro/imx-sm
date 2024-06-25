@@ -70,6 +70,8 @@
 #define SCMI_MSG_MISC_RESET_REASON         0xAU
 /*! Get silicon info */
 #define SCMI_MSG_MISC_SI_INFO              0xBU
+/*! EEPROM Xfer */
+#define SCMI_MSG_MISC_EEPROM_XFER          0xCU
 /*! Read control notification event */
 #define SCMI_MSG_MISC_CONTROL_EVENT        0x0U
 /** @} */
@@ -174,6 +176,16 @@
 #define SCMI_MISC_SHUTDOWN_FLAG_ERR_ID(x)   (((x) & 0x7FFF00U) >> 8U)
 /*! Reason */
 #define SCMI_MISC_SHUTDOWN_FLAG_REASON(x)   (((x) & 0xFFU) >> 0U)
+/** @} */
+
+/*!
+ * @name SCMI EEPROM transfer direction
+ */
+/** @{ */
+/*! Direction read */
+#define SCMI_MISC_EEPROM_XFER_DIR_READ   0U
+/*! Direction write */
+#define SCMI_MISC_EEPROM_XFER_DIR_WRITE  1U 
 /** @} */
 
 /* Functions */
@@ -538,6 +550,23 @@ int32_t SCMI_MiscNegotiateProtocolVersion(uint32_t channel,
  */
 int32_t SCMI_MiscControlEvent(uint32_t channel, uint32_t *ctrlId,
     uint32_t *flags);
+
+/*!
+ * Transfer to/from EEPROM.
+ *
+ * @param[in]     channel  P2A notify channel for comms.
+ * @param[in]     devId    I2C address of the EEPROM.
+ * @param[in]     dir      Direction of transfer.
+ * @param[in]     offset   Offset to transfer to/from.
+ * @param[in]     buf     Pointer to data to transfer.
+ * @param[in]     len      Length of data to transfer.
+ * @return Returns the status (::SM_ERR_SUCCESS = success).
+ *
+ * Return errors (see @ref STATUS "SM error codes"):
+ * - ::SM_ERR_HARDWARE_ERROR: if there is an issue transferring to/from the EEPROM.
+ */
+int32_t SCMI_MiscEepromXfer(uint32_t channel, uint8_t devId, uint8_t dir, 
+    uint16_t offset, uint8_t* buffer, uint16_t len);
 
 #endif /* SCMI_MISC_H */
 
