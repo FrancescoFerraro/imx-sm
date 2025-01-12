@@ -691,7 +691,8 @@ int32_t BRD_SM_EepromWrite(uint16_t offset, uint8_t *data, uint16_t len)
 /*--------------------------------------------------------------------------*/
 /* Xfer data to EEPROM                                                      */
 /*--------------------------------------------------------------------------*/
-uint8_t *buffer, uint16_t len)
+int32_t BRD_SM_EepromXfer(uint8_t dir, uint16_t offset,
+    uint8_t *buffer, uint16_t len)
 {
     switch (dir)
     {
