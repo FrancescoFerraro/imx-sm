@@ -1138,13 +1138,12 @@ int32_t SCMI_MiscControlEvent(uint32_t channel, uint32_t *ctrlId,
 /*--------------------------------------------------------------------------*/
 /* Perform EEPROM Xfer                                                      */
 /*--------------------------------------------------------------------------*/
-int32_t SCMI_MiscEepromXfer(uint32_t channel, uint8_t devId, uint8_t dir, 
+int32_t SCMI_MiscEepromXfer(uint32_t channel, uint8_t devId, uint8_t dir,
     uint16_t offset, uint8_t* buffer, uint16_t len)
 {
     int32_t status;
     uint32_t header;
     void *msg;
-
     /* Request message structure */
     typedef struct
     {
@@ -1155,40 +1154,33 @@ int32_t SCMI_MiscEepromXfer(uint32_t channel, uint8_t devId, uint8_t dir,
         uint32_t buffer;
         uint32_t len;
     } msg_tmiscd12_t;
-
     /* Acquire lock */
     SCMI_A2P_LOCK(channel);
-
     /* Init buffer */
     status = SCMI_BufInit(channel, &msg);
-    
+
     /* Send request */
     if (status == SCMI_ERR_SUCCESS)
     {
         msg_tmiscd12_t *msgTx = (msg_tmiscd12_t *) msg;
-
         msgTx->devId = (uint32_t)devId;
         msgTx->dir = (uint32_t)dir;
         msgTx->buffer = (uint32_t)buffer;
         msgTx->offset = (uint32_t)offset;
         msgTx->len = (uint32_t)len;
-
         /* Send message */
         status = SCMI_A2pTx(channel, COMMAND_PROTOCOL,
-            SCMI_MSG_MISC_EEPROM_XFER, sizeof(msg_tmiscd12_t), 
+            SCMI_MSG_MISC_EEPROM_XFER, sizeof(msg_tmiscd12_t),
             &header);
     }
-
     /* Receive response */
     if (status == SCMI_ERR_SUCCESS)
     {
         /* Reseive message */
         status = SCMI_A2pRx(channel, sizeof(msg_status_t), header);
     }
-
     /* Release lock */
     SCMI_A2P_UNLOCK(channel);
-
     /* Return status */
     return status;
 }
